@@ -6,23 +6,23 @@
   bc,
   nukeReferences,
 }:
-
 stdenv.mkDerivation (finalAttrs: {
   pname = "rtl8852bu";
-  version = "${kernel.version}-unstable-2025-05-18";
+  version = "${kernel.version}-unstable-2025-05-18.1";
 
   src = fetchFromGitHub {
     owner = "morrownr";
-    repo = "rtl8852bu-20240418";
-    rev = "1ef537712a55400aad637f53e45b60ed5ee621d7";
-    hash = "sha256-8bO82ytorBYgIT0dNKRocOhiCrUhya7DkkMlJ1XM3Hk=";
+    repo = "rtl8852bu-20250826";
+    rev = "b6a299b4fe95cb6a37eec27a6c3b21cbaa6abfa8";
+    hash = "sha256-QgVDm7G3iVwNhRIfK+fLpx2P44XjX3Dny4cYFex5l70=";
   };
 
-  nativeBuildInputs = [
-    bc
-    nukeReferences
-  ]
-  ++ kernel.moduleBuildDependencies;
+  nativeBuildInputs =
+    [
+      bc
+      nukeReferences
+    ]
+    ++ kernel.moduleBuildDependencies;
   hardeningDisable = [
     "pic"
     "format"
@@ -39,14 +39,25 @@ stdenv.mkDerivation (finalAttrs: {
       --replace-fail /lib/modules "${kernel.dev}/lib/modules"
   '';
 
-  makeFlags = [
-    "ARCH=${stdenv.hostPlatform.linuxArch}"
-    ("CONFIG_PLATFORM_I386_PC=" + (if stdenv.hostPlatform.isx86 then "y" else "n"))
-    ("CONFIG_PLATFORM_ARM_RPI=" + (if stdenv.hostPlatform.isAarch then "y" else "n"))
-  ]
-  ++ lib.optionals (stdenv.hostPlatform != stdenv.buildPlatform) [
-    "CROSS_COMPILE=${stdenv.cc.targetPrefix}"
-  ];
+  makeFlags =
+    [
+      "ARCH=${stdenv.hostPlatform.linuxArch}"
+      ("CONFIG_PLATFORM_I386_PC="
+        + (
+          if stdenv.hostPlatform.isx86
+          then "y"
+          else "n"
+        ))
+      ("CONFIG_PLATFORM_ARM_RPI="
+        + (
+          if stdenv.hostPlatform.isAarch
+          then "y"
+          else "n"
+        ))
+    ]
+    ++ lib.optionals (stdenv.hostPlatform != stdenv.buildPlatform) [
+      "CROSS_COMPILE=${stdenv.cc.targetPrefix}"
+    ];
 
   preInstall = ''
     mkdir -p "$out/lib/modules/${kernel.modDirVersion}/kernel/net/wireless/"
@@ -63,10 +74,10 @@ stdenv.mkDerivation (finalAttrs: {
 
   meta = {
     description = "Driver for Realtek rtl8852bu and rtl8832bu chipsets, provides the 8852bu mod";
-    homepage = "https://github.com/morrownr/rtl8852bu-20240418";
+    homepage = "https://github.com/morrownr/rtl8852bu-20250826";
     license = lib.licenses.gpl2Only;
-    platforms = [ "x86_64-linux" ];
-    broken = kernel.kernelAtLeast "6.18"; # Similar to 79c1cf6
+    platforms = ["x86_64-linux"];
+    broken = false; #kernel.kernelAtLeast "6.18"; # Similar to 79c1cf6
     maintainers = with lib.maintainers; [
       lonyelon
       thtrf
